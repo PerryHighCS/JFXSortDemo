@@ -14,11 +14,14 @@ public class SortDemo extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
+        // Load the sort demo scene
         FXMLLoader fxl = new FXMLLoader(getClass().getResource("/fxml/SortScene.fxml"));
         Parent root = fxl.load();
         
+        // Extract the controller for the scene
         SortController sc = fxl.<SortController>getController();
         
+        // Setup the window to display the sort demo on
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
         stage.getIcons().add(new Image(SortDemo.class.getResourceAsStream("/icon.png")));

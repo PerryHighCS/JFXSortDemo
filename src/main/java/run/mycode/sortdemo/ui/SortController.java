@@ -25,7 +25,11 @@ import run.mycode.sortdemo.sort.SelectionSorter;
 import run.mycode.sortdemo.sort.SteppableSorter;
 
 public class SortController implements Initializable {
-
+    private final int NUM_BARS = 100;
+    private final double CYCLE_TIME = 5;
+    private final double ACCESS_DIEOFF = 100;
+    private final double CHANGE_DIEOFF = 200;
+    
     @FXML
     private Pane barDisplay;
 
@@ -55,11 +59,6 @@ public class SortController implements Initializable {
     
     @FXML
     private Label time;
-
-    private final int NUM_BARS = 100;
-    private final double CYCLE_TIME = 5;
-    private final double ACCESS_DIEOFF = 100;
-    private final double CHANGE_DIEOFF = 300;
 
     private boolean halfHeight;
 
@@ -329,8 +328,7 @@ public class SortController implements Initializable {
             if (val == null) {
                 return;
             }
-            val.setColor(Color.BLUE);
-            val.fadeToColor(Color.BLACK, ACCESS_DIEOFF);
+            val.fadeColor(Color.BLUE, ACCESS_DIEOFF);
         });
 
         // When an element is modified, turn it red for a bit and make sure the
@@ -340,6 +338,11 @@ public class SortController implements Initializable {
                 return;
             }
 
+            if (oldval != null) {
+                oldval.setVisible(false);
+            }
+            val.setVisible(true);
+            
             // determine the width of the bars for positioning them
             final double barWidth = barDisplay.getWidth() / NUM_BARS;
             final double bottom = topHalf ? barDisplay.getHeight() / 2
@@ -355,8 +358,7 @@ public class SortController implements Initializable {
 
             val.setTranslateX(idx * barWidth);
 
-            val.setColor(Color.RED);
-            val.fadeToColor(Color.BLACK, CHANGE_DIEOFF);
+            val.fadeColor(Color.RED, CHANGE_DIEOFF);
         });
     }
 

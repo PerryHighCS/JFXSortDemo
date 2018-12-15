@@ -3,9 +3,11 @@ package run.mycode.sortdemo.sort;
 import run.mycode.sortdemo.DemoArray;
 
 /**
+ * Perform a selection sort on a DemoArray
+ * 
+ * @param <T> The type of data to sort
  *
  * @author bdahl
- * @param <T>
  */
 public class SelectionSorter<T extends Comparable<T>> implements SteppableSorter {
     private final DemoArray<T> arr;
@@ -15,39 +17,57 @@ public class SelectionSorter<T extends Comparable<T>> implements SteppableSorter
     private int j;
     private int min;
     
+    /**
+     * Prepare to selection sort a DemoArray
+     * @param arr the array to sort
+     */
     public SelectionSorter(DemoArray<T> arr) {
         this.arr = arr;
+        this.done = arr.length() <= 1;
+        
+        // initialize the sort pointers
         this.i = 0;
         this.j = i+1;
         this.min = 0;      
-        this.done = false;
     }
     
+    /**
+     * Perform the next step in the sort
+     */
     @Override
     public void step() {
         if (done == true) {
             return;
         }
         
+        // Compare the item at the current min position with the item at j
         if (arr.compare(min, j) > 0) {
-            min = j;
+            min = j; // Update if we have found a new minimum
         } 
         
-        j++;
+        j++; // Move to the next element
         
-        if (j >= arr.length()) {
-            arr.swap(i, min);
+        // Once the j pointer has scanned the whole array
+        if (j >= arr.length()) { 
+            arr.swap(i, min); // Swap the current item and the smallest found
             
-            i++;
-            j = i + 1;
-            min = i;
+            // Update the index pointers
+            i++;       // Move the i index to the next element
+            j = i + 1; // Move the j pointer to the element after i
+            min = i;   // Assume the element at i is the new minimum
         }
         
+        // Once i has scanned the whole array, the sort is complete
         if (i >= arr.length() - 1) {
             done = true;
         }        
     }
 
+    /**
+     * Check if the sort operation is complete
+     * 
+     * @return true if the sort has completed 
+     */
     @Override
     public boolean isSorted() {
         return done;
