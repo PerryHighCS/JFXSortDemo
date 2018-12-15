@@ -106,6 +106,7 @@ public class DemoArray<T extends Comparable<T>> {
     
     public synchronized int compare(int index1, int index2) {
         accesses.set(accesses.get() + 2);
+        gets.set(gets.get() + 2);
         compares.set(compares.get() + 1);
         if (onAccess != null) {
             onAccess.call(index1, data[index1]);
@@ -120,6 +121,7 @@ public class DemoArray<T extends Comparable<T>> {
     
     public synchronized int compare(int index, T item) {
         accesses.set(accesses.get() + 1);
+        gets.set(gets.get() + 1);
         compares.set(compares.get() + 1);
         if (onAccess != null) {
             onAccess.call(index, data[index]);
@@ -133,6 +135,7 @@ public class DemoArray<T extends Comparable<T>> {
     
     public synchronized void swap(int index1, int index2) {
         accesses.set(accesses.get() + 4);
+        gets.set(gets.get() + 2);
         puts.set(puts.get() + 2);
         swaps.set(swaps.get() + 1);
 
