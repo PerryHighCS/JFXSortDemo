@@ -18,6 +18,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import run.mycode.sortdemo.DemoArray;
 import run.mycode.sortdemo.sort.BubbleSorter;
+import run.mycode.sortdemo.sort.HeapSorter;
 import run.mycode.sortdemo.sort.InsertionSorter;
 import run.mycode.sortdemo.sort.MergeSorter;
 import run.mycode.sortdemo.sort.QuickSorter;
@@ -131,6 +132,11 @@ public class SortController implements Initializable {
             case INSERTION:
                 array = initBarArray(startingSortType, false);
                 sorter = new InsertionSorter<>(array);
+                connectData(array);
+                break;
+            case HEAP:
+                array = initBarArray(startingSortType, false);
+                sorter = new HeapSorter<>(array);
                 connectData(array);
                 break;
             case MERGE:
@@ -435,7 +441,9 @@ public class SortController implements Initializable {
     private static enum Algorithm {
         ALL("All"),
         BUBBLE("Bubble Sort"), SELECTION("Selection Sort"),
-        INSERTION("Insertion Sort"), MERGE("Merge Sort"), QUICK("Quick Sort");
+        INSERTION("Insertion Sort"), HEAP("Heap Sort"), 
+        MERGE("Merge Sort"), QUICK("Quick Sort"),
+        ;
 
         public final String text;
 
