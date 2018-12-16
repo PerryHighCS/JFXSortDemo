@@ -211,6 +211,17 @@ public class SortController implements Initializable {
         // Setup listeners to handle resizing the window
         barDisplay.widthProperty().addListener(ae -> redraw());
         barDisplay.heightProperty().addListener(ae -> redraw());
+        
+        // prepare a display of sorted bars once the UI has been fully inited
+        Timeline showBars = new Timeline(
+                new KeyFrame (
+                        Duration.millis(1),
+                        ae -> {
+                            this.initBarArray(DataLayout.SORTED, false);
+                        })
+        );
+        showBars.setCycleCount(1);
+        showBars.play();
     }
 
     /**
@@ -340,13 +351,13 @@ public class SortController implements Initializable {
         // When an element is modified, turn it red for a bit and make sure the
         // bar is properly located in the display
         array.setOnChange((idx, oldval, val) -> {
+            if (oldval != null) {
+                oldval.setVisible(false);
+            }
             if (val == null) {
                 return;
             }
 
-            if (oldval != null) {
-                oldval.setVisible(false);
-            }
             val.setVisible(true);
             
             // determine the width of the bars for positioning them
