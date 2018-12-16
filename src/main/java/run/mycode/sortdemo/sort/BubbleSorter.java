@@ -1,6 +1,6 @@
 package run.mycode.sortdemo.sort;
 
-import run.mycode.sortdemo.DemoArray;
+import run.mycode.sortdemo.util.DemoArray;
 
 /**
  * Perform a bubble sort on a DemoArray
@@ -9,7 +9,10 @@ import run.mycode.sortdemo.DemoArray;
  *
  * @author bdahl
  */
-public class BubbleSorter<T extends Comparable<T>> implements SteppableSorter {
+public class BubbleSorter<T extends Comparable<T>> implements SteppableSorter<T> {
+    
+    public static final String NAME = "Bubble Sort";
+    
     private final DemoArray<T> arr;
     private boolean done;
     
@@ -69,5 +72,14 @@ public class BubbleSorter<T extends Comparable<T>> implements SteppableSorter {
     public boolean isSorted() {
         return done;
     }
-    
+
+    @Override
+    public boolean usesScratchArray() {
+        return false;
+    }
+
+    @Override
+    public DemoArray<T> getScratchArray() {
+        return null;
+    }
 }

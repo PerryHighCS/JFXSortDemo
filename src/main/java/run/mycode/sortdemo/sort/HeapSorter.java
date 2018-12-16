@@ -2,7 +2,7 @@ package run.mycode.sortdemo.sort;
 
 import java.util.ArrayList;
 import java.util.List;
-import run.mycode.sortdemo.DemoArray;
+import run.mycode.sortdemo.util.DemoArray;
 
 /**
  * Perform a heap sort on a DemoArray
@@ -11,7 +11,9 @@ import run.mycode.sortdemo.DemoArray;
  *
  * @author bdahl
  */
-public class HeapSorter<T extends Comparable<T>> implements SteppableSorter {
+public class HeapSorter<T extends Comparable<T>> implements SteppableSorter<T> {
+    
+    public static final String NAME = "Heap Sort";
 
     private final DemoArray<T> arr;
     private final List<HeapStackFrame> stack; // an operating stack to keep
@@ -132,6 +134,16 @@ public class HeapSorter<T extends Comparable<T>> implements SteppableSorter {
     @Override
     public boolean isSorted() {
         return done;
+    }
+    
+    @Override
+    public boolean usesScratchArray() {
+        return false;
+    }
+
+    @Override
+    public DemoArray<T> getScratchArray() {
+        return null;
     }
 }
 

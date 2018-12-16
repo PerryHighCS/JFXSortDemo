@@ -1,6 +1,6 @@
 package run.mycode.sortdemo.sort;
 
-import run.mycode.sortdemo.DemoArray;
+import run.mycode.sortdemo.util.DemoArray;
 
 /**
  * Perform an insertion sort on a DemoArray
@@ -10,7 +10,9 @@ import run.mycode.sortdemo.DemoArray;
  * @author bdahl
  */
 public class InsertionSorter<T extends Comparable<T>>
-        implements SteppableSorter {
+        implements SteppableSorter<T> {
+    
+    public static final String NAME = "Insertion Sort";
 
     private final DemoArray<T> arr;
 
@@ -76,4 +78,13 @@ public class InsertionSorter<T extends Comparable<T>>
         return done;
     }
 
+    @Override
+    public boolean usesScratchArray() {
+        return false;
+    }
+
+    @Override
+    public DemoArray<T>  getScratchArray() {
+        return null;
+    }
 }

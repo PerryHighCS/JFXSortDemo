@@ -1,8 +1,15 @@
 package run.mycode.sortdemo.ui;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
@@ -16,14 +23,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
-import run.mycode.sortdemo.DemoArray;
-import run.mycode.sortdemo.sort.BubbleSorter;
-import run.mycode.sortdemo.sort.HeapSorter;
-import run.mycode.sortdemo.sort.InsertionSorter;
-import run.mycode.sortdemo.sort.MergeSorter;
-import run.mycode.sortdemo.sort.QuickSorter;
-import run.mycode.sortdemo.sort.SelectionSorter;
+import org.reflections.Reflections;
 import run.mycode.sortdemo.sort.SteppableSorter;
+import run.mycode.sortdemo.util.DemoArray;
 
 public class SortController implements Initializable {
     private final int NUM_BARS = 100;
@@ -35,7 +37,7 @@ public class SortController implements Initializable {
     private Pane barDisplay;
 
     @FXML
-    private ChoiceBox<Algorithm> sortChoice;
+    private ChoiceBox<String> sortChoice;
 
     @FXML
     private ChoiceBox<DataLayout> dataChoice;
@@ -61,8 +63,15 @@ public class SortController implements Initializable {
     @FXML
     private Label time;
 
+    private final List<Class<SteppableSorter>> algorithms;
+    private final Map<String, Class<SteppableSorter>> sortMap;
     private boolean halfHeight;
 
+    public SortController() {
+        algorithms = new ArrayList<>();
+        sortMap = new HashMap<>();
+    }
+    
     /**
      * Handle the user clicking on the Sort button by beginning the sorting demo
      *
@@ -70,28 +79,36 @@ public class SortController implements Initializable {
      */
     @FXML
     private void startSorts(ActionEvent event) {
-        final Algorithm sortAlgorithm = sortChoice.getValue();
+        final String sortName = sortChoice.getValue();
         final DataLayout startingSort = dataChoice.getValue();
 
-        if (sortAlgorithm != Algorithm.ALL) {
+        if (!"All".equals(sortName)) {
+            Class<SteppableSorter> sortAlgorithm = sortMap.get(sortName);
             // If a particular sort was chosen, demonstrate it
             demoSort(startingSort, sortAlgorithm, null);
         } else {
             // Perform all sorts by building up a chain of callbacks from last to first
 
             // The very last sort should reset the choice box to ALL
-            Runnable thisSort = () -> sortChoice.setValue(Algorithm.ALL);
+            Runnable thisSort = () -> sortChoice.setValue("All");
 
             // Loop through all the available algrithms in reverse order
-            Algorithm[] algorithms = Algorithm.values();
-            for (int i = algorithms.length - 1; i >= 1; i--) {
-                Algorithm a = algorithms[i];
-
+            for (int i = algorithms.size() - 1; i >= 1; i--) {
+                Class<SteppableSorter> clazz = algorithms.get(i);
+                
+                
                 // When it is this algorithm's turn,
                 final Runnable nextSort = thisSort;
                 thisSort = () -> {
-                    sortChoice.setValue(a);             // First set the choice box to indicate the algorithm
-                    demoSort(startingSort, a, nextSort);  // Then perform the sort deno
+                    String name;
+                    try {
+                        Field nameField = clazz.getField("NAME");
+                        sortChoice.setValue((String)nameField.get(null));
+                    } catch (IllegalArgumentException | IllegalAccessException |
+                             NoSuchFieldException | SecurityException ex) {
+                        sortChoice.setValue(clazz.getSimpleName());
+                    }
+                    demoSort(startingSort, clazz, nextSort);  // Then perform the sort demo
                 };
             }
 
@@ -107,90 +124,77 @@ public class SortController implements Initializable {
      * already sorted data
      * @param sortAlgorithm The sorting algorithm to use
      * @param whenDone A callback to make when the sorting is complete
+     * 
+     * @return the name of the sorting algorithm
      */
-    private void demoSort(DataLayout startingSortType, Algorithm sortAlgorithm, Runnable whenDone) {
-        final SteppableSorter sorter;
-        DemoArray<SortableBar> array;
-
-        // Most algorithms only use one array, so prepare to display using the
-        // full hight of the content pane
-        halfHeight = false;
-
-        // Prepare the array for sorting, choose the proper sorter, and connect
-        // the array's instrumentation to the display labels
-        switch (sortAlgorithm) {
-            case BUBBLE:
-                array = initBarArray(startingSortType, false);
-                sorter = new BubbleSorter<>(array);
-                connectData(array);
-                break;
-            case SELECTION:
-                array = initBarArray(startingSortType, false);
-                sorter = new SelectionSorter<>(array);
-                connectData(array);
-                break;
-            case INSERTION:
-                array = initBarArray(startingSortType, false);
-                sorter = new InsertionSorter<>(array);
-                connectData(array);
-                break;
-            case HEAP:
-                array = initBarArray(startingSortType, false);
-                sorter = new HeapSorter<>(array);
-                connectData(array);
-                break;
-            case MERGE:
-                halfHeight = true; // Merge sort needs two arrays, so shrink the display
-                array = initBarArray(startingSortType, false);
-                DemoArray<SortableBar> tmp = new DemoArray<>(array.length());
+    @SuppressWarnings("unchecked")
+    private void demoSort(DataLayout startingSortType, 
+            Class<SteppableSorter> sortAlgorithm, Runnable whenDone) {
+        
+        try {
+            // Prepare the array for sorting
+            final DemoArray<SortableBar> array = initBarArray(startingSortType, false);
+            
+            // Construct the proper sorter
+            Constructor sortConst = sortAlgorithm.getConstructor(DemoArray.class);
+            final SteppableSorter<SortableBar> sorter = 
+                    (SteppableSorter<SortableBar>)sortConst.newInstance(array);
+            
+            halfHeight = sorter.usesScratchArray();
+            
+            if (halfHeight) {
+                // If the algorithm uses two arrays, prepare to display using 
+                // two half height displays
+                DemoArray<SortableBar> tmp = sorter.getScratchArray();
                 initEvents(tmp, true);
-                sorter = new MergeSorter<>(array, tmp);
                 connectData(array, tmp); // Hook up instrumentation from both arrays
-                break;
-            case QUICK:
-                array = initBarArray(startingSortType, false);
-                sorter = new QuickSorter<>(array);
-                connectData(array);
-                break;
-            default:
-                throw new IllegalArgumentException("Sorting algorithm not implemented: " + sortAlgorithm);
-        }
+            }
+            else {
+                connectData(array);   // Hook up instrumentation from the array
+            }
+            
+            redraw();
+        
+            final long startTime = System.nanoTime();
+            time.setText("0ms");
+            // Set up a timeline to repeatedly step through the sorting algorithm
+            final Timeline sortAnimation = new Timeline();
+            sortAnimation.getKeyFrames().add(new KeyFrame(
+                    Duration.millis(CYCLE_TIME), // The time between steps in the algorithm
+                    ae -> {
+                        // Update the time display
+                        long elapsed = (System.nanoTime() - startTime) / 1_000_000;
+                        time.setText(elapsed + "ms");
 
-        final long startTime = System.nanoTime();
-        time.setText("0ms");
-        // Set up a timeline to repeatedly step through the sorting algorithm
-        final Timeline sortAnimation = new Timeline();
-        sortAnimation.getKeyFrames().add(new KeyFrame(
-                Duration.millis(CYCLE_TIME), // The time between steps in the algorithm
-                ae -> {
-                    // Update the time display
-                    long elapsed = (System.nanoTime() - startTime) / 1_000_000;
-                    time.setText(elapsed + "ms");
-                    
-                    if (!sorter.isSorted()) { // If there is more sorting to do
-                        sorter.step();        // perform the next step
-                    } else {                  // If sorting is complete
-                        sortAnimation.stop();   // Stop the animation
+                        if (!sorter.isSorted()) { // If there is more sorting to do
+                            sorter.step();        // perform the next step
+                        } else {                  // If sorting is complete
+                            sortAnimation.stop();   // Stop the animation
 
-                        if (whenDone != null) { // and call any provided callback
-                            Timeline waitForIt
-                            = new Timeline(
-                                    new KeyFrame( // after 1 second 
-                                            Duration.millis(1000),
-                                            e -> whenDone.run()
-                                    )
-                            );
-                            waitForIt.setCycleCount(1);
-                            waitForIt.play();
+                            if (whenDone != null) { // and call any provided callback
+                                Timeline waitForIt
+                                = new Timeline(
+                                        new KeyFrame( // after 1 second 
+                                                Duration.millis(1000),
+                                                e -> whenDone.run()
+                                        )
+                                );
+                                waitForIt.setCycleCount(1);
+                                waitForIt.play();
+                            }
                         }
-                    }
-                })
-        );
+                    })
+            );
 
-        // Start the sorting animation running, we'll stop it when we know its
-        // done
-        sortAnimation.setCycleCount(Timeline.INDEFINITE);
-        sortAnimation.play();
+            // Start the sorting animation running, we'll stop it when we know its
+            // done
+            sortAnimation.setCycleCount(Timeline.INDEFINITE);
+            sortAnimation.play();
+        } 
+        catch (NoSuchMethodException | InstantiationException | 
+               IllegalAccessException  | IllegalArgumentException | 
+               InvocationTargetException ex) {
+        }
     }
 
     /**
@@ -200,10 +204,30 @@ public class SortController implements Initializable {
      * @param rb unused
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void initialize(URL url, ResourceBundle rb) {
+        
+        Reflections reflections = new Reflections("run.mycode.sortdemo");
+        Set<Class<? extends SteppableSorter>> classes = 
+                reflections.getSubTypesOf(SteppableSorter.class);
+        classes.forEach(c -> {
+            algorithms.add((Class<SteppableSorter>)c);
+            
+            String name;
+            try {
+                Field nameField = c.getField("NAME");
+                name = (String)nameField.get(null);
+            } catch (IllegalArgumentException | IllegalAccessException |
+                     NoSuchFieldException | SecurityException ex) {
+                name = c.getSimpleName();
+            }
+            sortMap.put(name, (Class<SteppableSorter>)c);            
+        });
+        
         // Set up the choiceboxes with the appropriate values and preselect 
         // the first option
-        sortChoice.getItems().addAll(Algorithm.values());
+        sortChoice.getItems().add("All");
+        sortMap.entrySet().forEach(e -> sortChoice.getItems().add(e.getKey()));
         sortChoice.getSelectionModel().select(0);
         dataChoice.getItems().addAll(DataLayout.values());
         dataChoice.getSelectionModel().select(0);
@@ -445,28 +469,6 @@ public class SortController implements Initializable {
             arr[i] = t;
         }
     }
-
-    /**
-     * The available sorting algorithms along with text descriptions
-     */
-    private static enum Algorithm {
-        ALL("All"),
-        BUBBLE("Bubble Sort"), SELECTION("Selection Sort"),
-        INSERTION("Insertion Sort"), HEAP("Heap Sort"), 
-        MERGE("Merge Sort"), QUICK("Quick Sort"),
-        ;
-
-        public final String text;
-
-        private Algorithm(String text) {
-            this.text = text;
-        }
-
-        @Override
-        public String toString() {
-            return this.text;
-        }
-    };
 
     /**
      * The available initial data orderings along with text descriptions

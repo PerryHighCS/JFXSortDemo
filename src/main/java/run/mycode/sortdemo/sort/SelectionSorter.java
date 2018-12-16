@@ -1,15 +1,22 @@
 package run.mycode.sortdemo.sort;
 
-import run.mycode.sortdemo.DemoArray;
+import run.mycode.sortdemo.util.DemoArray;
 
 /**
  * Perform a selection sort on a DemoArray
+ * 
+ * NOTE: implementors should also include a private static final String NAME 
+ * that includes a readable name for the sorting algorithm, or the classname 
+ * will be used
  * 
  * @param <T> The type of data to sort
  *
  * @author bdahl
  */
-public class SelectionSorter<T extends Comparable<T>> implements SteppableSorter {
+public class SelectionSorter<T extends Comparable<T>> implements SteppableSorter<T> {
+    
+    public static final String NAME = "Selection Sort";
+    
     private final DemoArray<T> arr;
     
     private boolean done;
@@ -73,4 +80,13 @@ public class SelectionSorter<T extends Comparable<T>> implements SteppableSorter
         return done;
     }
     
+    @Override
+    public boolean usesScratchArray() {
+        return false;
+    }
+
+    @Override
+    public DemoArray<T> getScratchArray() {
+        return null;
+    }
 }

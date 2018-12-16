@@ -1,9 +1,9 @@
-package run.mycode.sortdemo;
+package run.mycode.sortdemo.util;
 
 import java.util.Arrays;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import static run.mycode.sortdemo.DemoArray.accessCallback;
+import static run.mycode.sortdemo.util.DemoArray.accessCallback;
 
 /**
  * An array with accessors to allow tracking of data accesses and changes

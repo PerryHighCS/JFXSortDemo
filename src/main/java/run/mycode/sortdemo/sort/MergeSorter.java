@@ -2,7 +2,7 @@ package run.mycode.sortdemo.sort;
 
 import java.util.ArrayList;
 import java.util.List;
-import run.mycode.sortdemo.DemoArray;
+import run.mycode.sortdemo.util.DemoArray;
 
 /**
  * Perform a merge sort on a DemoArray
@@ -11,7 +11,9 @@ import run.mycode.sortdemo.DemoArray;
  *
  * @author dahlem.brian
  */
-public class MergeSorter<T extends Comparable<T>> implements SteppableSorter {
+public class MergeSorter<T extends Comparable<T>> implements SteppableSorter<T> {
+    
+    public static final String NAME = "Merge Sort";
 
     private final DemoArray<T> arr;
     private final DemoArray<T> tmp; // a scratch array to work in
@@ -24,11 +26,10 @@ public class MergeSorter<T extends Comparable<T>> implements SteppableSorter {
      * Prepare to insertion sort a DemoArray
      *
      * @param arr the array to sort
-     * @param tmp a scratch array to use in the sort (must be same size as arr)
      */
-    public MergeSorter(DemoArray<T> arr, DemoArray<T> tmp) {
+    public MergeSorter(DemoArray<T> arr) {
         this.arr = arr;
-        this.tmp = tmp;
+        this.tmp = new DemoArray<>(arr.length());
 
         if (tmp.length() < arr.length()) {
             throw new IllegalArgumentException("tmp array must be same size as array to sort.");
@@ -164,6 +165,15 @@ public class MergeSorter<T extends Comparable<T>> implements SteppableSorter {
         return done;
     }
 
+    @Override
+    public boolean usesScratchArray() {
+        return true;
+    }
+
+    @Override
+    public DemoArray<T> getScratchArray() {
+        return tmp;
+    }
     /**
      * An stack object that can keep track of operational state in a merge sort
      */
