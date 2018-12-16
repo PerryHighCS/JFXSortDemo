@@ -113,6 +113,9 @@ public class DemoArray<T extends Comparable<T>> {
         if (onAccess != null) {
             onAccess.call(index, data[index]);
         }
+        if (onChange != null) {
+            onChange.call(index, data[index], null);
+        }
         
         T item = data[index];
         data[index] = null;
