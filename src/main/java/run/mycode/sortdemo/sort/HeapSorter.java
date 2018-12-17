@@ -167,7 +167,7 @@ class HeapStackFrame {
         return frame;
     }
 
-    public static <T extends Comparable<T>> HeapStackFrame heapify(int root, int size) {
+    public static HeapStackFrame heapify(int root, int size) {
         HeapStackFrame frame = new HeapStackFrame();
 
         frame.state = State.HEAP_CHECK_L;

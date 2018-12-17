@@ -82,7 +82,7 @@ public class SortController implements Initializable {
         final String sortName = sortChoice.getValue();
         final DataLayout startingSort = dataChoice.getValue();
 
-        if (!"All".equals(sortName)) {
+        if (!("All".equals(sortName))) {
             Class<SteppableSorter> sortAlgorithm = sortMap.get(sortName);
             // If a particular sort was chosen, demonstrate it
             demoSort(startingSort, sortAlgorithm, null);
@@ -93,7 +93,7 @@ public class SortController implements Initializable {
             Runnable thisSort = () -> sortChoice.setValue("All");
 
             // Loop through all the available algrithms in reverse order
-            for (int i = algorithms.size() - 1; i >= 1; i--) {
+            for (int i = algorithms.size() - 1; i >= 0; i--) {
                 Class<SteppableSorter> clazz = algorithms.get(i);
                 
                 
@@ -375,7 +375,7 @@ public class SortController implements Initializable {
         // When an element is modified, turn it red for a bit and make sure the
         // bar is properly located in the display
         array.setOnChange((idx, oldval, val) -> {
-            if (oldval != null) {
+            if (oldval != null && oldval != val) {
                 oldval.setVisible(false);
             }
             if (val == null) {
