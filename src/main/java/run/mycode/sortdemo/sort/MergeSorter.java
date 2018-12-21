@@ -117,16 +117,11 @@ public class MergeSorter<T extends Comparable<T>> implements SteppableSorter<T> 
 
         for (int k = beg; k <= end; k++) {
             stepSem.acquire();   // Pause for the next step
-            T itm;
             if (tmp.compare(i, j) < 0) {
-                itm = tmp.remove(i);
-                stepSem.acquire();   // Pause for the next step
-                arr.set(k, itm);
+                arr.set(k, tmp.remove(i));
                 i++;
             } else {
-                itm = tmp.remove(j);
-                stepSem.acquire();   // Pause for the next step
-                arr.set(k, itm);
+                arr.set(k, tmp.remove(j));
                 j--;
             }
         }
