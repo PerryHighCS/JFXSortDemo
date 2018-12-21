@@ -23,7 +23,7 @@ public class HeapSorter<T extends Comparable<T>> extends SteppableSorter<T> {
     }
 
     @Override
-    protected synchronized void sort() {
+    protected void sort() {
         try {
             int n = arr.length();
             
@@ -32,7 +32,7 @@ public class HeapSorter<T extends Comparable<T>> extends SteppableSorter<T> {
             }
             
             for (int i=n-1; i >= 0; i--) {
-                this.wait();
+                step.acquire();  // Pause for the next step
                 arr.swap(0, i);
                 
                 heapify(i, 0);
@@ -43,27 +43,27 @@ public class HeapSorter<T extends Comparable<T>> extends SteppableSorter<T> {
         done = true;
     }
     
-    private synchronized void heapify(int len, int root) 
+    private void heapify(int len, int root) 
             throws InterruptedException {
         int largest = root;
         int l = 2*root + 1; // left child
         int r = 2*root + 2; // right child
         
         // If the left child is > root
-        this.wait();
+        step.acquire();  // Pause for the next step
         if (l < len && arr.compare(l, largest) > 0) {
             largest = l;
         }
         
         // If the right child is the greatest of the three
-        this.wait();
+        step.acquire();  // Pause for the next step
         if (r < len && arr.compare(r, largest) > 0) {
             largest = r;
         }
         
         // If the largest isn't the root
         if (largest != root) {
-            this.wait();
+            step.acquire();  // Pause for the next step
             arr.swap(root, largest); // move the largest up
             
             heapify(len, largest); // And heapify the child that was changed

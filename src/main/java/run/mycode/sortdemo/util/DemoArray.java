@@ -72,7 +72,7 @@ public class DemoArray<T extends Comparable<T>> {
     /**
      * Reset the access/change counts
      */
-    public synchronized void resetCounts() {
+    public void resetCounts() {
         resetProperties();
     }
 
@@ -100,7 +100,7 @@ public class DemoArray<T extends Comparable<T>> {
      * @param index
      * @return
      */
-    public synchronized T get(int index) {
+    public T get(int index) {
         final T d = data[index];
         fxRunSafe(() -> {
             accesses.set(accesses.get() + 1);
@@ -121,7 +121,7 @@ public class DemoArray<T extends Comparable<T>> {
      * @param index the location to remove an element from
      * @return the element removed from the array
      */
-    public synchronized T remove(int index) {
+    public T remove(int index) {
         final T d = data[index];
         fxRunSafe(() -> {
             accesses.set(accesses.get() + 1);
@@ -146,7 +146,7 @@ public class DemoArray<T extends Comparable<T>> {
      * @param index
      * @param item
      */
-    public synchronized void set(int index, T item) {
+    public void set(int index, T item) {
         final T d = data[index];
         fxRunSafe(() -> {
             accesses.set(accesses.get() + 1);
@@ -169,7 +169,7 @@ public class DemoArray<T extends Comparable<T>> {
      * @param index the index of the item to move, will contain null after move
      * @param newIndex the new index to move to
      */
-    public synchronized void move(int index, int newIndex) {
+    public void move(int index, int newIndex) {
         final T d1 = data[index];
         final T d2 = data[newIndex];
         
@@ -199,7 +199,7 @@ public class DemoArray<T extends Comparable<T>> {
      * @param index2
      * @return
      */
-    public synchronized int compare(int index1, int index2) {
+    public int compare(int index1, int index2) {
         final T d1 = data[index1];
         final T d2 = data[index2];
         
@@ -228,7 +228,7 @@ public class DemoArray<T extends Comparable<T>> {
      * are the same value, Positive if the item should come before the array
      * element
      */
-    public synchronized int compare(int index, T item) {
+    public int compare(int index, T item) {
         final T d = data[index];
         fxRunSafe(() -> {
             accesses.set(accesses.get() + 1);
@@ -251,7 +251,7 @@ public class DemoArray<T extends Comparable<T>> {
      * @param index1
      * @param index2
      */
-    public synchronized void swap(int index1, int index2) {
+    public void swap(int index1, int index2) {
         final T d1 = data[index1];
         final T d2 = data[index2];
         

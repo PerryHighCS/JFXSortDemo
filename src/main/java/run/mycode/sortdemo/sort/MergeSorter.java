@@ -45,7 +45,7 @@ public class MergeSorter<T extends Comparable<T>> extends SteppableSorter<T> {
         done = true;
     }
 
-    private synchronized void mergeSort(int beg, int end) throws InterruptedException {
+    private void mergeSort(int beg, int end) throws InterruptedException {
         if (beg >= end) {
             return;
         }
@@ -56,13 +56,13 @@ public class MergeSorter<T extends Comparable<T>> extends SteppableSorter<T> {
         mergeSort(m + 1, end);
 
         for (int i = beg; i <= m; i++) {
-            this.wait();   // Pause for the next step
+            step.acquire();     // Pause for the next step
             tmp.set(i, arr.get(i));
         }
 
         for (int i = m + 1; i <= end; i++) {
             int j = end + m + 1 - i;
-            this.wait();   // Pause for the next step
+            step.acquire();     // Pause for the next step
             tmp.set(j, arr.get(i));
         }
 
@@ -70,13 +70,13 @@ public class MergeSorter<T extends Comparable<T>> extends SteppableSorter<T> {
         int j = end;
 
         for (int k = beg; k <= end; k++) {
-            this.wait();   // Pause for the next step
+            step.acquire();  // Pause for the next step
             if (tmp.compare(i, j) < 0) {
-                this.wait();
+                step.acquire();  // Pause for the next step
                 arr.set(k, tmp.remove(i));
                 i++;
             } else {
-                this.wait();
+                step.acquire();  // Pause for the next step
                 arr.set(k, tmp.remove(j));
                 j--;
             }

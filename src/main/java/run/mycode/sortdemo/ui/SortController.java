@@ -29,7 +29,7 @@ import run.mycode.sortdemo.util.DemoArray;
 
 public class SortController implements Initializable {
 
-    private final int NUM_BARS = 50;
+    private final int NUM_BARS = 100;
     private final double CYCLE_TIME = 5;
     private final double ACCESS_DIEOFF = 100;
     private final double CHANGE_DIEOFF = 200;

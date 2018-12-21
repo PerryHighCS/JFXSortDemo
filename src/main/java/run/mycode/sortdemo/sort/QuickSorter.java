@@ -30,28 +30,28 @@ public class QuickSorter<T extends Comparable<T>>
         done = true;
     }
     
-    private synchronized void quickSort(int beg, int end) throws InterruptedException {
+    private void quickSort(int beg, int end) throws InterruptedException {
         int i = beg;
         int j = end;
         
-        this.wait();
+        step.acquire();  // Pause for the next step
         T pivot = arr.get((i + j) / 2);
         
         while (i <= j) {
-            this.wait();
+            step.acquire();  // Pause for the next step
             while (arr.compare(i, pivot) < 0) {
                 i++;
-                this.wait();
+                step.acquire();  // Pause for the next step
             }
             
-            this.wait();
+            step.acquire();  // Pause for the next step
             while (arr.compare(j, pivot) > 0) {
                 j--;
-                this.wait();
+                step.acquire();  // Pause for the next step
             }
             
             if (i <= j) {
-                this.wait();
+                step.acquire();  // Pause for the next step
                 arr.swap(i, j);
                 i++;
                 j--;   

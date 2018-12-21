@@ -24,7 +24,7 @@ public class BubbleSorter<T extends Comparable<T>>
     }
     
     @Override
-    protected synchronized void sort() {
+    protected void sort() {
         boolean swapped;
         int j = arr.length() - 1;
 
@@ -32,11 +32,12 @@ public class BubbleSorter<T extends Comparable<T>>
             do {
                 swapped = false;
                 for (int i = 0; i < j; i++) {
-                    this.wait();  // Pause for the next step
+                    
+                        step.acquire();  // Pause for the next step
                     
                     if (arr.compare(i, i + 1) > 0) {
                         swapped = true;
-                        this.wait();  // Pause for the next step
+                        step.acquire();  // Pause for the next step
                         arr.swap(i, i + 1);
                     }
                 }

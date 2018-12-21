@@ -27,19 +27,19 @@ public class SelectionSorter<T extends Comparable<T>>
     }
     
     @Override
-    protected synchronized void sort() {
+    protected void sort() {
         try {
             for (int i = 0; i < arr.length() - 1; i++) {
                 int min = i;
                 for (int j = i + 1; j < arr.length(); j++) {
-                    this.wait();
+                    step.acquire();  // Pause for the next step
                     if (arr.compare(j, min) < 0) {
                         min = j;
                     }
                 }
                 
                 if (i != min) {
-                    this.wait();
+                    step.acquire();  // Pause for the next step
                     arr.swap(min, i);
                 }
             }

@@ -1,5 +1,6 @@
 package run.mycode.sortdemo.sort;
 
+import java.util.concurrent.Semaphore;
 import run.mycode.sortdemo.util.DemoArray;
 
 /**
@@ -13,6 +14,7 @@ import run.mycode.sortdemo.util.DemoArray;
 public abstract class SteppableSorter<T extends Comparable<T>> {   
     protected boolean done;
     protected boolean started;
+    protected Semaphore step;
     
     protected final DemoArray<T> arr;
     
@@ -20,6 +22,8 @@ public abstract class SteppableSorter<T extends Comparable<T>> {
     
     public SteppableSorter(DemoArray<T> arr, String sortName) {
         this.arr = arr;
+        
+        this.step = new Semaphore(0);
         
         // 0 or 1 element is already sorted
         this.done = arr.length() <= 1;
@@ -53,7 +57,7 @@ public abstract class SteppableSorter<T extends Comparable<T>> {
     /**
      * Perform the next step of the sort
      */
-    public synchronized void step() {
+    public void step() {
         if (done || sorter == null) {
             return;
         }
@@ -63,7 +67,7 @@ public abstract class SteppableSorter<T extends Comparable<T>> {
             sorter.start();
         }
         
-        this.notify();
+        step.release(); // Execute the next step
     }
 
     /**

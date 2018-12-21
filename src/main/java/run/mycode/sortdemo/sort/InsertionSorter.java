@@ -24,24 +24,24 @@ public class InsertionSorter<T extends Comparable<T>>
     }
     
     @Override
-    protected synchronized void sort() {
+    protected void sort() {
         try {
             for (int i = 1; i < arr.length(); i++) {
                 
-                this.wait();
+                step.acquire();  // Pause for the next step
                 T item = arr.remove(i);
                 
                 int j = i - 1;
                 
-                this.wait();
+                step.acquire();  // Pause for the next step
                 while (j >= 0 && arr.compare(j, item) > 0) {
-                    this.wait();
+                    step.acquire();  // Pause for the next step
                     arr.move(j, j+1);
                     j--;
-                    this.wait();
+                    step.acquire();  // Pause for the next step
                 }
                 
-                this.wait();
+                step.acquire();  // Pause for the next step
                 arr.set(j + 1, item);
             }
         }
