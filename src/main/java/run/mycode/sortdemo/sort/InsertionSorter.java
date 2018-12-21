@@ -10,16 +10,9 @@ import run.mycode.sortdemo.util.DemoArray;
  * @author bdahl
  */
 public class InsertionSorter<T extends Comparable<T>>
-        implements SteppableSorter<T> {
+        extends SteppableSorter<T> {
     
-    public static final String NAME = "Insertion Sort";
-
-    private final DemoArray<T> arr;
-
-    private boolean done;
-    private int i; // i is the index of the next item to find a home for
-    private int j; // the index of the next position to check if it is the home
-    private T tmp; // tmp is the item that needs a home
+    public static final String NAME = "Insertion Sort";    
 
     /**
      * Prepare to insertion sort a DemoArray
@@ -27,64 +20,34 @@ public class InsertionSorter<T extends Comparable<T>>
      * @param arr the array to sort
      */
     public InsertionSorter(DemoArray<T> arr) {
-        this.arr = arr;
-        this.done = (arr.length() <= 1);
-
-        // prepare the sort pointers and data
-        this.i = 1; 
-        this.j = 0; 
-        if (!done) {
-            this.tmp = arr.remove(i);
-        } else {
-            this.tmp = null;
-        }
+        super(arr, NAME);    
     }
-
-    /**
-     * Perform the next step in the sort
-     */
+    
     @Override
-    public void step() {
-        if (done) {
-            return;
-        }
-
-        // If the home pointer hasn't reached the beginning of the array,
-        // and we are still looking for a home for the item
-        if (j >= 0 && arr.compare(j, tmp) > 0) {
-            arr.move(j, j + 1); // Move the item at j to make room
-            j--;                // prepare to check the next location
-        } else {
-            // move the item to the last position checked
-            arr.set(j + 1, tmp);
-            
-            i++; // move to the next item in the array
-            if (i >= arr.length()) { // if there are no more items,
-                done = true;         // the sort is complete
-                return;
+    protected synchronized void sort() {
+        try {
+            for (int i = 1; i < arr.length(); i++) {
+                
+                this.wait();
+                T item = arr.remove(i);
+                
+                int j = i - 1;
+                
+                this.wait();
+                while (j >= 0 && arr.compare(j, item) > 0) {
+                    this.wait();
+                    arr.move(j, j+1);
+                    j--;
+                    this.wait();
+                }
+                
+                this.wait();
+                arr.set(j + 1, item);
             }
-            j = i - 1;         // the next possible home is one before the item
-            tmp = arr.remove(i);  // copy out the item looking for a home
         }
-    }
-
-    /**
-     * Check if the sort operation is complete
-     *
-     * @return true if the sort has completed
-     */
-    @Override
-    public boolean isSorted() {
-        return done;
-    }
-
-    @Override
-    public boolean usesScratchArray() {
-        return false;
-    }
-
-    @Override
-    public DemoArray<T>  getScratchArray() {
-        return null;
+        catch (InterruptedException ex) {
+        }
+        
+        done = true;
     }
 }
