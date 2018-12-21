@@ -10,21 +10,24 @@ import run.mycode.sortdemo.util.DemoArray;
  *
  * @author bdahl
  */
-public interface SteppableSorter<T extends Comparable<T>> {
-    
+public interface SteppableSorter<T extends Comparable<T>> {    
     /**
      * Determine if the sorting algorithm uses a scratch array
      * 
      * @return true if the sorting algorithm requires a scratch array
      */
-    public boolean usesScratchArray();
+    default public boolean usesScratchArray() {
+        return false;
+    }
     
     /**
      * Retrieve a reference to the scratch array if the algorithm uses one
      * 
      * @return the scratch array, null if none is used
      */
-    public DemoArray<T> getScratchArray();
+    default public DemoArray<T> getScratchArray() {
+        return null;
+    }
     
     /**
      * Perform the next step of the sort
@@ -36,5 +39,5 @@ public interface SteppableSorter<T extends Comparable<T>> {
      *
      * @return true if the sorting algorithm has completed
      */
-    public boolean isSorted();    
+    public boolean isSorted();
 }
