@@ -1,6 +1,7 @@
 package run.mycode.sortdemo.util;
 
 import java.util.Arrays;
+import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import static run.mycode.sortdemo.util.DemoArray.accessCallback;
@@ -75,11 +76,22 @@ public class DemoArray<T extends Comparable<T>> {
     }
     
     private void resetProperties() {
-        accesses.set(0);
-        gets.set(0);
-        puts.set(0);
-        compares.set(0);
-        swaps.set(0);
+        fxRunSafe(() -> {
+            accesses.set(0);
+            gets.set(0);
+            puts.set(0);
+            compares.set(0);
+            swaps.set(0);
+        });
+    }
+    
+    private void fxRunSafe(Runnable r) {
+        if (Platform.isFxApplicationThread()) {
+            r.run();
+        }
+        else {
+            Platform.runLater(r);
+        }
     }
     
     /**
@@ -89,12 +101,14 @@ public class DemoArray<T extends Comparable<T>> {
      * @return 
      */
     public synchronized T get(int index) {
-        accesses.set(accesses.get() + 1);
-        gets.set(gets.get() + 1);
+        fxRunSafe(() -> {
+            accesses.set(accesses.get() + 1);
+            gets.set(gets.get() + 1);
 
-        if (onAccess != null) {
-            onAccess.call(index, data[index]);
-        }
+            if (onAccess != null) {
+                onAccess.call(index, data[index]);
+            }
+        });
         
         return data[index];
     }
@@ -107,15 +121,17 @@ public class DemoArray<T extends Comparable<T>> {
      * @return the element removed from the array
      */
     public synchronized T remove(int index) {
-        accesses.set(accesses.get() + 1);
-        gets.set(gets.get() + 1);
-
-        if (onAccess != null) {
-            onAccess.call(index, data[index]);
-        }
-        if (onChange != null) {
-            onChange.call(index, data[index], null);
-        }
+        fxRunSafe(() -> {
+            accesses.set(accesses.get() + 1);
+            gets.set(gets.get() + 1);
+        
+            if (onAccess != null) {
+                onAccess.call(index, data[index]);
+            }
+            if (onChange != null) {
+                onChange.call(index, data[index], null);
+            }
+        });
         
         T item = data[index];
         data[index] = null;
@@ -129,15 +145,17 @@ public class DemoArray<T extends Comparable<T>> {
      * @param item 
      */
     public synchronized void set(int index, T item) {
-        accesses.set(accesses.get() + 1);
-        puts.set(puts.get() + 1);
+        fxRunSafe(() -> {
+            accesses.set(accesses.get() + 1);
+            puts.set(puts.get() + 1);
 
-        if (onAccess != null) {
-            onAccess.call(index, data[index]);
-        }        
-        if (onChange != null) {
-            onChange.call(index, data[index], item);
-        }
+            if (onAccess != null) {
+                onAccess.call(index, data[index]);
+            }        
+            if (onChange != null) {
+                onChange.call(index, data[index], item);
+            }
+        });
         
         data[index] = item;
     }
@@ -149,18 +167,20 @@ public class DemoArray<T extends Comparable<T>> {
      * @param newIndex the new index to move to
      */
     public synchronized void move(int index, int newIndex) {
-        accesses.set(accesses.get() + 1);
-        gets.set(gets.get() + 1);
-        puts.set(puts.get() + 1);
-        
-        if (onAccess != null) {
-            onAccess.call(index, data[index]);
-            onAccess.call(newIndex, data[index]);
-        }        
-        if (onChange != null) {
-            onChange.call(index, data[index], null);
-            onChange.call(newIndex, data[newIndex], data[index]);
-        }
+        fxRunSafe(() -> {
+            accesses.set(accesses.get() + 1);
+            gets.set(gets.get() + 1);
+            puts.set(puts.get() + 1);
+
+            if (onAccess != null) {
+                onAccess.call(index, data[index]);
+                onAccess.call(newIndex, data[index]);
+            }        
+            if (onChange != null) {
+                onChange.call(index, data[index], null);
+                onChange.call(newIndex, data[newIndex], data[index]);
+            }
+        });
         
         data[newIndex] = data[index];
         data[index] = null;
@@ -174,16 +194,18 @@ public class DemoArray<T extends Comparable<T>> {
      * @return 
      */
     public synchronized int compare(int index1, int index2) {
-        accesses.set(accesses.get() + 2);
-        gets.set(gets.get() + 2);
-        compares.set(compares.get() + 1);
-        if (onAccess != null) {
-            onAccess.call(index1, data[index1]);
-            onAccess.call(index2, data[index2]);
-        }
-        if (onCompare != null) {
-            onCompare.call(index1, index2, data[index1], data[index2]);
-        }
+        fxRunSafe(() -> {
+            accesses.set(accesses.get() + 2);
+            gets.set(gets.get() + 2);
+            compares.set(compares.get() + 1);
+            if (onAccess != null) {
+                onAccess.call(index1, data[index1]);
+                onAccess.call(index2, data[index2]);
+            }
+            if (onCompare != null) {
+                onCompare.call(index1, index2, data[index1], data[index2]);
+            }
+        });
         
         return data[index1].compareTo(data[index2]);
     }
@@ -198,15 +220,17 @@ public class DemoArray<T extends Comparable<T>> {
      *         array element
      */
     public synchronized int compare(int index, T item) {
-        accesses.set(accesses.get() + 1);
-        gets.set(gets.get() + 1);
-        compares.set(compares.get() + 1);
-        if (onAccess != null) {
-            onAccess.call(index, data[index]);
-        }
-        if (onCompare != null) {
-            onCompare.call(index, -1, data[index], item);
-        }
+        fxRunSafe(() -> {
+            accesses.set(accesses.get() + 1);
+            gets.set(gets.get() + 1);
+            compares.set(compares.get() + 1);
+            if (onAccess != null) {
+                onAccess.call(index, data[index]);
+            }
+            if (onCompare != null) {
+                onCompare.call(index, -1, data[index], item);
+            }
+        });
         
         return data[index].compareTo(item);
     }
@@ -218,19 +242,21 @@ public class DemoArray<T extends Comparable<T>> {
      * @param index2 
      */
     public synchronized void swap(int index1, int index2) {
-        accesses.set(accesses.get() + 4);
-        gets.set(gets.get() + 2);
-        puts.set(puts.get() + 2);
-        swaps.set(swaps.get() + 1);
+        fxRunSafe(() -> {
+            accesses.set(accesses.get() + 4);
+            gets.set(gets.get() + 2);
+            puts.set(puts.get() + 2);
+            swaps.set(swaps.get() + 1);
 
-        if (onAccess != null) {
-            onAccess.call(index1, data[index1]);
-            onAccess.call(index2, data[index2]);
-        }        
-        if (onChange != null) {
-            onChange.call(index2, null, data[index1]);
-            onChange.call(index1, null, data[index2]);
-        }
+            if (onAccess != null) {
+                onAccess.call(index1, data[index1]);
+                onAccess.call(index2, data[index2]);
+            }        
+            if (onChange != null) {
+                onChange.call(index2, null, data[index1]);
+                onChange.call(index1, null, data[index2]);
+            }
+        });
         
         T temp = data[index1];
         data[index1] = data[index2];

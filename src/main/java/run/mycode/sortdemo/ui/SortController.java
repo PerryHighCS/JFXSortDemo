@@ -28,11 +28,12 @@ import run.mycode.sortdemo.sort.SteppableSorter;
 import run.mycode.sortdemo.util.DemoArray;
 
 public class SortController implements Initializable {
+
     private final int NUM_BARS = 100;
     private final double CYCLE_TIME = 5;
     private final double ACCESS_DIEOFF = 100;
     private final double CHANGE_DIEOFF = 200;
-    
+
     @FXML
     private Pane barDisplay;
 
@@ -59,7 +60,7 @@ public class SortController implements Initializable {
 
     @FXML
     private Label comps;
-    
+
     @FXML
     private Label time;
 
@@ -71,7 +72,7 @@ public class SortController implements Initializable {
         algorithms = new ArrayList<>();
         sortMap = new HashMap<>();
     }
-    
+
     /**
      * Handle the user clicking on the Sort button by beginning the sorting demo
      *
@@ -95,17 +96,16 @@ public class SortController implements Initializable {
             // Loop through all the available algrithms in reverse order
             for (int i = algorithms.size() - 1; i >= 0; i--) {
                 Class<SteppableSorter> clazz = algorithms.get(i);
-                
-                
+
                 // When it is this algorithm's turn,
                 final Runnable nextSort = thisSort;
                 thisSort = () -> {
                     String name;
                     try {
                         Field nameField = clazz.getField("NAME");
-                        sortChoice.setValue((String)nameField.get(null));
-                    } catch (IllegalArgumentException | IllegalAccessException |
-                             NoSuchFieldException | SecurityException ex) {
+                        sortChoice.setValue((String) nameField.get(null));
+                    } catch (IllegalArgumentException | IllegalAccessException
+                            | NoSuchFieldException | SecurityException ex) {
                         sortChoice.setValue(clazz.getSimpleName());
                     }
                     demoSort(startingSort, clazz, nextSort);  // Then perform the sort demo
@@ -124,37 +124,36 @@ public class SortController implements Initializable {
      * already sorted data
      * @param sortAlgorithm The sorting algorithm to use
      * @param whenDone A callback to make when the sorting is complete
-     * 
+     *
      * @return the name of the sorting algorithm
      */
     @SuppressWarnings("unchecked")
-    private void demoSort(DataLayout startingSortType, 
+    private void demoSort(DataLayout startingSortType,
             Class<SteppableSorter> sortAlgorithm, Runnable whenDone) {
-        
+
         try {
             // Prepare the array for sorting
             final DemoArray<SortableBar> array = initBarArray(startingSortType, false);
-            
+
             // Construct the proper sorter
             Constructor sortConst = sortAlgorithm.getConstructor(DemoArray.class);
-            final SteppableSorter<SortableBar> sorter = 
-                    (SteppableSorter<SortableBar>)sortConst.newInstance(array);
-            
+            final SteppableSorter<SortableBar> sorter
+                    = (SteppableSorter<SortableBar>) sortConst.newInstance(array);
+
             halfHeight = sorter.usesScratchArray();
-            
+
             if (halfHeight) {
                 // If the algorithm uses two arrays, prepare to display using 
                 // two half height displays
                 DemoArray<SortableBar> tmp = sorter.getScratchArray();
                 initEvents(tmp, true);
                 connectData(array, tmp); // Hook up instrumentation from both arrays
-            }
-            else {
+            } else {
                 connectData(array);   // Hook up instrumentation from the array
             }
-            
+
             redraw();
-        
+
             final long startTime = System.nanoTime();
             time.setText("0ms");
             // Set up a timeline to repeatedly step through the sorting algorithm
@@ -190,10 +189,9 @@ public class SortController implements Initializable {
             // done
             sortAnimation.setCycleCount(Timeline.INDEFINITE);
             sortAnimation.play();
-        } 
-        catch (NoSuchMethodException | InstantiationException | 
-               IllegalAccessException  | IllegalArgumentException | 
-               InvocationTargetException ex) {
+        } catch (NoSuchMethodException | InstantiationException
+                | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException ex) {
         }
     }
 
@@ -206,24 +204,24 @@ public class SortController implements Initializable {
     @Override
     @SuppressWarnings("unchecked")
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         Reflections reflections = new Reflections("run.mycode.sortdemo");
-        Set<Class<? extends SteppableSorter>> classes = 
-                reflections.getSubTypesOf(SteppableSorter.class);
+        Set<Class<? extends SteppableSorter>> classes
+                = reflections.getSubTypesOf(SteppableSorter.class);
         classes.forEach(c -> {
-            algorithms.add((Class<SteppableSorter>)c);
-            
+            algorithms.add((Class<SteppableSorter>) c);
+
             String name;
             try {
                 Field nameField = c.getField("NAME");
-                name = (String)nameField.get(null);
-            } catch (IllegalArgumentException | IllegalAccessException |
-                     NoSuchFieldException | SecurityException ex) {
+                name = (String) nameField.get(null);
+            } catch (IllegalArgumentException | IllegalAccessException
+                    | NoSuchFieldException | SecurityException ex) {
                 name = c.getSimpleName();
             }
-            sortMap.put(name, (Class<SteppableSorter>)c);            
+            sortMap.put(name, (Class<SteppableSorter>) c);
         });
-        
+
         // Set up the choiceboxes with the appropriate values and preselect 
         // the first option
         sortChoice.getItems().add("All");
@@ -235,10 +233,10 @@ public class SortController implements Initializable {
         // Setup listeners to handle resizing the window
         barDisplay.widthProperty().addListener(ae -> redraw());
         barDisplay.heightProperty().addListener(ae -> redraw());
-        
+
         // prepare a display of sorted bars once the UI has been fully inited
         Timeline showBars = new Timeline(
-                new KeyFrame (
+                new KeyFrame(
                         Duration.millis(1),
                         ae -> {
                             this.initBarArray(DataLayout.SORTED, false);
@@ -383,7 +381,7 @@ public class SortController implements Initializable {
             }
 
             val.setVisible(true);
-            
+
             // determine the width of the bars for positioning them
             final double barWidth = barDisplay.getWidth() / NUM_BARS;
             final double bottom = topHalf ? barDisplay.getHeight() / 2
