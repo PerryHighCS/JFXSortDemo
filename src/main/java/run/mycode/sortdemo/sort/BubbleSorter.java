@@ -1,85 +1,94 @@
 package run.mycode.sortdemo.sort;
 
+import java.util.concurrent.Semaphore;
 import run.mycode.sortdemo.util.DemoArray;
 
 /**
  * Perform a bubble sort on a DemoArray
- * 
+ *
  * @param <T> The type of data to sort
  *
  * @author bdahl
  */
 public class BubbleSorter<T extends Comparable<T>> implements SteppableSorter<T> {
-    
+
     public static final String NAME = "Bubble Sort";
-    
+
     private final DemoArray<T> arr;
+
+    private boolean started;
     private boolean done;
-    
-    private boolean swapped;
-    private int i; // i is the index currently being inspected
-    private int j; // j points to the position the next largest item will move
-                   // into
-    
+
+    private final Semaphore stepSem;
+    private final Thread sorter;
+
     /**
      * Prepare to bubble sort a DemoArray
+     *
      * @param arr the array to sort
      */
     public BubbleSorter(DemoArray<T> arr) {
         this.arr = arr;
         this.done = arr.length() <= 1;
-        
-        // Initialize sort variables
-        this.swapped = false;
-        this.i = 0;
-        this.j = arr.length() - 2; 
+
+        this.stepSem = new Semaphore(0);
+
+        // 0 or 1 element is already sorted
+        if (done) {
+            sorter = null;
+            started = false;
+        } else {
+            started = false;
+            sorter = new Thread(() -> sort(), "Bubble Sort");
+        }
     }
-    
+
     /**
      * Perform the next step in the sort
      */
     @Override
-    public void step() {        
-        if (done) {
+    public void step() {
+        if (done || sorter == null) {
             return;
         }
-        
-        // Compare the current element to the next element
-        if (arr.compare(i, i + 1) > 0) {
-            arr.swap(i, i + 1); // if the current element is larger, bubble it up
-            swapped = true;     // and remember that something was moved
+
+        if (!sorter.isAlive() && !started) {
+            started = true;
+            sorter.start();
         }
-                
-        // Loop until the largest unsorted element has moved into place
-        if (i < j) {
-            i++;
-        }
-        else {
-            // Once the largest has reached its home,
-            done = (swapped == false); // we are done if nothing was moved
-            swapped = false;  // reset the swapped flag
-            i = 0;            // move back to the beginning of the array
-            j--;              // the home of the next largest item
-        }
+
+        stepSem.release();
     }
 
-    /**
-     * Check if the sort operation is complete
-     * 
-     * @return true if the sort has completed 
-     */
+    private void sort() {
+
+        boolean swapped;
+        int j = arr.length() - 1;
+
+        try {
+            do {
+                swapped = false;
+                for (int i = 0; i < j; i++) {
+                    stepSem.acquire();  // Pause for the next step
+                    
+                    if (arr.compare(i, i + 1) > 0) {
+                        swapped = true;
+                        stepSem.acquire();  // Pause for the next step
+                        arr.swap(i, i + 1);
+                    }
+                }
+
+                j--; // Every pass the biggest moves to the end, so don't go that far
+            } while (swapped);
+        } catch (InterruptedException ex) {
+            System.out.println("Bubble Sort interrupted");
+        }
+
+        done = true;
+    }
+
     @Override
     public boolean isSorted() {
         return done;
-    }
-
-    @Override
-    public boolean usesScratchArray() {
-        return false;
-    }
-
-    @Override
-    public DemoArray<T> getScratchArray() {
-        return null;
     }
 }
