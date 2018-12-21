@@ -17,15 +17,15 @@ All such accesses are counted with the counts accessible by accessor methods or
 via properties.
 
 ## Adding Sorting Algorithms
-Sorting algorithms can be added to the package run.mycode.sortdemo.sort . 
-Sorting algorithms need to implement the interface SteppableSorter in order to 
-be run by the demo. Classes added to the package that implement this interface 
-will be automatically added to the Sorting Method ChoiceBox when the program 
-starts. The algorithms provided can be used as an example of converting common 
-algorithms into steppable versions. Ideally for this project, one "step" of an 
-algorithm corresponds to one access to the data being sorted, but may also 
-represent a complicated step in the algorithm, such as preparing to sort or 
-changing state in the algorithm. See MergeSorter, HeapSorter, and 
-QuickSorter for examples of how recursive algorithms can be made steppable. 
-BubbleSort and MergeSorter use a semaphore to more easily adapt a sorting 
-algorithm to being stepped.
+Sorting algorithms need to extend the abstract class SteppableSorter in order to 
+be run by the demo. Sorting algorithms can be added to the package 
+run.mycode.sortdemo.sort . Classes added to the package that extend 
+SteppableSorter will be automatically added to the Sorting Method ChoiceBox when
+the program starts.
+
+Sorting algorithms should use the semaphore named step to pause between "steps".
+Ideally for this demo, one "step" of an algorithm corresponds to one access to
+the data being sorted, but may also represent a complicated step in the 
+algorithm, such as preparing to sort or changing state in the algorithm. The
+step semaphore is released each time step() is called, so before accessing the
+array, use step.acquire() to wait.
