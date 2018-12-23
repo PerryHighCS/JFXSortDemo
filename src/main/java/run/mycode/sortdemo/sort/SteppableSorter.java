@@ -20,6 +20,13 @@ public abstract class SteppableSorter<T extends Comparable<T>> {
     
     protected Thread sorter;
     
+    /**
+     * Prepare the sorter to sort the array and spawn a new thread to run the
+     * sorting
+     * 
+     * @param arr       The array to be sorted
+     * @param sortName  The name of the sort to tag the thread with
+     */
     public SteppableSorter(DemoArray<T> arr, String sortName) {
         this.arr = arr;
         
