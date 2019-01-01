@@ -12,8 +12,8 @@ import run.mycode.sortdemo.util.DemoArray;
  * @author bdahl
  */
 public abstract class SteppableSorter<T extends Comparable<T>> {   
-    protected boolean done;
-    protected boolean started;
+    protected volatile boolean done;
+    protected volatile boolean started;
     protected Semaphore step;
     
     protected final DemoArray<T> arr;
