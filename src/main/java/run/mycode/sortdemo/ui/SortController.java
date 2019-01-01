@@ -67,6 +67,7 @@ public class SortController implements Initializable {
     private final List<Class<SteppableSorter>> algorithms;
     private final Map<String, Class<SteppableSorter>> sortMap;
     private boolean halfHeight;
+    private volatile boolean interrupted;
 
     public SortController() {
         algorithms = new ArrayList<>();
@@ -165,7 +166,11 @@ public class SortController implements Initializable {
                         long elapsed = (System.nanoTime() - startTime) / 1_000_000;
                         time.setText(elapsed + "ms");
 
-                        if (!sorter.isSorted()) { // If there is more sorting to do
+                        if (sorter.isInterrupted() || interrupted) {
+                            sortAnimation.stop();
+                            sorter.interrupt();
+                        }
+                        else if (!sorter.isSorted()) { // If there is more sorting to do
                             sorter.step();        // perform the next step
                         } else {                  // If sorting is complete
                             sortAnimation.stop();   // Stop the animation
@@ -245,6 +250,10 @@ public class SortController implements Initializable {
         );
         showBars.setCycleCount(1);
         showBars.play();
+    }
+    
+    public void shutdown() {
+        interrupted = true;
     }
 
     /**

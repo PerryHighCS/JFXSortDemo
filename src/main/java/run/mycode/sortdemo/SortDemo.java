@@ -3,6 +3,7 @@ package run.mycode.sortdemo;
 import run.mycode.sortdemo.ui.SortController;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -28,8 +29,9 @@ public class SortDemo extends Application {
         stage.setTitle("SortDemo");
         stage.setScene(scene);
         stage.show();
+        stage.setOnHidden(e -> sc.shutdown());
     }
-
+    
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
      * main() serves only as fallback in case the application can not be

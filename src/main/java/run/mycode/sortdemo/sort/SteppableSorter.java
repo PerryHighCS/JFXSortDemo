@@ -117,6 +117,22 @@ public abstract class SteppableSorter<T extends Comparable<T>> {
     }
 
     /**
+     * Check if the sorting thread has been interrupted and cannot continue
+     * 
+     * @return true if the thread was interrupted
+     */
+    public boolean isInterrupted() {
+        return sorter.isInterrupted();
+    }
+    
+    /**
+     * Interrupt the sorting thread
+     */
+    public void interrupt() {
+        sorter.interrupt();
+    }
+    
+    /**
      * Perform the sorting operation on arr. This method will be called in a new 
      * thread, to sort the DemoArray arr.
      * 
