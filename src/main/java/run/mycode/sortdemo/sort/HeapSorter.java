@@ -23,8 +23,7 @@ public class HeapSorter<T extends Comparable<T>> extends SteppableSorter<T> {
     }
 
     @Override
-    protected void sort() {
-        try {
+    protected void sort() throws InterruptedException {
             int n = arr.length();
             
             for (int i = n / 2 - 1; i >= 0; i--) {
@@ -37,9 +36,6 @@ public class HeapSorter<T extends Comparable<T>> extends SteppableSorter<T> {
                 
                 heapify(i, 0);
             }
-        } catch (InterruptedException ex) {
-
-        }
         done = true;
     }
     

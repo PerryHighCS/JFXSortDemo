@@ -10,7 +10,7 @@ import run.mycode.sortdemo.util.DemoArray;
  * @author dahlem.brian
  */
 public class MergeSorter<T extends Comparable<T>> extends SteppableSorter<T> {
-
+    
     public static final String NAME = "Merge Sort";
     
     private final DemoArray<T> tmp; // a scratch array to work in
@@ -37,11 +37,9 @@ public class MergeSorter<T extends Comparable<T>> extends SteppableSorter<T> {
     }
 
     @Override
-    protected void sort() {
-        try {
-            mergeSort(0, arr.length() - 1);
-        } catch (InterruptedException ex) {
-        }
+    protected void sort()  throws InterruptedException {
+        mergeSort(0, arr.length() - 1);
+        
         done = true;
     }
 

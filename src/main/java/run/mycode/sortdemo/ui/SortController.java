@@ -192,6 +192,7 @@ public class SortController implements Initializable {
         } catch (NoSuchMethodException | InstantiationException
                 | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException ex) {
+            throw new AssertionError(ex);
         }
     }
 

@@ -11,7 +11,7 @@ import run.mycode.sortdemo.util.DemoArray;
  */
 public class InsertionSorter<T extends Comparable<T>>
         extends SteppableSorter<T> {
-    
+
     public static final String NAME = "Insertion Sort";    
 
     /**
@@ -22,32 +22,28 @@ public class InsertionSorter<T extends Comparable<T>>
     public InsertionSorter(DemoArray<T> arr) {
         super(arr, NAME);    
     }
-    
+
     @Override
-    protected void sort() {
-        try {
-            for (int i = 1; i < arr.length(); i++) {
-                
+    protected void sort() throws InterruptedException {
+        for (int i = 1; i < arr.length(); i++) {
+
+            step.acquire();  // Pause for the next step
+            T item = arr.remove(i);
+
+            int j = i - 1;
+
+            step.acquire();  // Pause for the next step
+            while (j >= 0 && arr.compare(j, item) > 0) {
                 step.acquire();  // Pause for the next step
-                T item = arr.remove(i);
-                
-                int j = i - 1;
-                
+                arr.move(j, j + 1);
+                j--;
                 step.acquire();  // Pause for the next step
-                while (j >= 0 && arr.compare(j, item) > 0) {
-                    step.acquire();  // Pause for the next step
-                    arr.move(j, j+1);
-                    j--;
-                    step.acquire();  // Pause for the next step
-                }
-                
-                step.acquire();  // Pause for the next step
-                arr.set(j + 1, item);
             }
+
+            step.acquire();  // Pause for the next step
+            arr.set(j + 1, item);
         }
-        catch (InterruptedException ex) {
-        }
-        
+
         done = true;
     }
 }

@@ -1,7 +1,5 @@
 package run.mycode.sortdemo.sort;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import run.mycode.sortdemo.util.DemoArray;
 
 /**
@@ -15,17 +13,14 @@ public class QuickSorter<T extends Comparable<T>>
         extends SteppableSorter<T> {
     
     public static final String NAME = "Quick Sort";
-
+    
     public QuickSorter(DemoArray<T> arr) {
         super(arr, NAME); 
     }
 
     @Override
-    protected void sort() {
-        try {
-            quickSort(0, arr.length() - 1);
-        } catch (InterruptedException ex) {
-        }
+    protected void sort() throws InterruptedException {
+        quickSort(0, arr.length() - 1);
         
         done = true;
     }
