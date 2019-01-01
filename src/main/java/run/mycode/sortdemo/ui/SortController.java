@@ -68,6 +68,7 @@ public class SortController implements Initializable {
     private final Map<String, Class<SteppableSorter>> sortMap;
     private boolean halfHeight;
     private volatile boolean interrupted;
+    private volatile SteppableSorter<SortableBar> sorter;
 
     public SortController() {
         algorithms = new ArrayList<>();
@@ -83,6 +84,14 @@ public class SortController implements Initializable {
     private void startSorts(ActionEvent event) {
         final String sortName = sortChoice.getValue();
         final DataLayout startingSort = dataChoice.getValue();
+        
+        /**
+         * Stop any running sort
+         */
+        if (sorter != null) {
+            sorter.interrupt();
+            sorter = null;
+        }
 
         if (!("All".equals(sortName))) {
             Class<SteppableSorter> sortAlgorithm = sortMap.get(sortName);
@@ -96,20 +105,20 @@ public class SortController implements Initializable {
 
             // Loop through all the available algrithms in reverse order
             for (int i = algorithms.size() - 1; i >= 0; i--) {
-                Class<SteppableSorter> clazz = algorithms.get(i);
+                Class<SteppableSorter> sortClass = algorithms.get(i);
 
                 // When it is this algorithm's turn,
                 final Runnable nextSort = thisSort;
                 thisSort = () -> {
                     String name;
                     try {
-                        Field nameField = clazz.getField("NAME");
+                        Field nameField = sortClass.getField("NAME");
                         sortChoice.setValue((String) nameField.get(null));
                     } catch (IllegalArgumentException | IllegalAccessException
                             | NoSuchFieldException | SecurityException ex) {
-                        sortChoice.setValue(clazz.getSimpleName());
+                        sortChoice.setValue(sortClass.getSimpleName());
                     }
-                    demoSort(startingSort, clazz, nextSort);  // Then perform the sort demo
+                    demoSort(startingSort, sortClass, nextSort);  // Then perform the sort demo
                 };
             }
 
@@ -138,8 +147,7 @@ public class SortController implements Initializable {
 
             // Construct the proper sorter
             Constructor sortConst = sortAlgorithm.getConstructor(DemoArray.class);
-            final SteppableSorter<SortableBar> sorter
-                    = (SteppableSorter<SortableBar>) sortConst.newInstance(array);
+            sorter = (SteppableSorter<SortableBar>) sortConst.newInstance(array);
 
             halfHeight = sorter.usesScratchArray();
 
@@ -157,6 +165,10 @@ public class SortController implements Initializable {
 
             final long startTime = System.nanoTime();
             time.setText("0ms");
+            
+            // Get a final reference for the lambda
+            final SteppableSorter<SortableBar> thisSorter = sorter;
+            
             // Set up a timeline to repeatedly step through the sorting algorithm
             final Timeline sortAnimation = new Timeline();
             sortAnimation.getKeyFrames().add(new KeyFrame(
@@ -166,12 +178,14 @@ public class SortController implements Initializable {
                         long elapsed = (System.nanoTime() - startTime) / 1_000_000;
                         time.setText(elapsed + "ms");
 
-                        if (sorter.isInterrupted() || interrupted) {
+                        if (thisSorter.isInterrupted()) {
                             sortAnimation.stop();
-                            sorter.interrupt();
                         }
-                        else if (!sorter.isSorted()) { // If there is more sorting to do
-                            sorter.step();        // perform the next step
+                        else if (interrupted) {
+                            thisSorter.interrupt();
+                        }
+                        else if (!thisSorter.isSorted()) { // If there is more sorting to do
+                            thisSorter.step();        // perform the next step
                         } else {                  // If sorting is complete
                             sortAnimation.stop();   // Stop the animation
 
