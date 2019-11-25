@@ -35,6 +35,8 @@
                </children>
             </VBox>
             <Separator maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" opacity="0.0" VBox.vgrow="ALWAYS" />
+            <!-- <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#stepSort" text="Step" /> -->
+            <Separator prefHeight="5.0" opacity="0.0" VBox.vgrow="ALWAYS" />
             <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#startSorts" text="Sort" />
          </children>
          <BorderPane.margin>
